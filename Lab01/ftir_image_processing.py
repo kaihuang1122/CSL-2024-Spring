@@ -1,35 +1,29 @@
 import cv2
 
 # Read the image
-frame = cv2.imread("test3.png")
+frame = cv2.imread("Lab01/test2.png")
+frame  = cv2.blur(frame, (45, 45))
 
 # Split RGB channels
-blue_channel, green_channel, red_channel = cv2.split(frame)
-
-cv2.imshow('frame', blue_channel)
-cv2.waitKey(0)
-cv2.imshow('frame', green_channel)
-cv2.waitKey(0)
-cv2.imshow('frame', red_channel)
-cv2.waitKey(0)
+b, g, r = cv2.split(frame)
 
 # Perform thresholding to each channel
 # Here we use a binary threshold as an example. You can adjust the threshold value and the max value.
-ret, thresh_blue = cv2.threshold(blue_channel, 200, 255, cv2.THRESH_BINARY_INV)
-ret, thresh_green = cv2.threshold(green_channel, 0, 255, cv2.THRESH_BINARY)
-ret, thresh_red = cv2.threshold(red_channel, 230, 255, cv2.THRESH_BINARY)
+_, thresh_b = cv2.threshold(b, 210, 255, cv2.THRESH_BINARY_INV)
+_, thresh_g = cv2.threshold(g, 210, 255, cv2.THRESH_BINARY_INV)
+_, thresh_r = cv2.threshold(r, 230, 255, cv2.THRESH_BINARY)
 
-cv2.imshow('frame', thresh_blue)
+cv2.imshow('b', thresh_b)
 cv2.waitKey(0)
-cv2.imshow('frame', thresh_green)
+cv2.imshow('g', thresh_g)
 cv2.waitKey(0)
-cv2.imshow('frame', thresh_red)
+cv2.imshow('r', thresh_r) 
 cv2.waitKey(0)
 
 # Get the final result using bitwise operation
 # Here we use bitwise AND operation to combine the thresholded channels
-final_thresh = cv2.bitwise_and(thresh_blue, thresh_green)
-final_thresh = cv2.bitwise_and(final_thresh, thresh_red)
+final_thresh = cv2.bitwise_or(thresh_b, thresh_g)
+final_thresh = cv2.bitwise_and(final_thresh, thresh_r)
 
 
 cv2.imshow('frame', final_thresh)
