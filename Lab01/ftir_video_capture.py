@@ -6,9 +6,10 @@ import keras
 model = keras.saving.load_model("digit_recognization.keras")
 
 # Choose your webcam: 0, 1, ...
-cap = cv2.VideoCapture("2024-03-13 17-33-58.mkv")
+#cap = cv2.VideoCapture("2024-03-13 17-33-58.mkv")
+cap = cv2.VideoCapture(1)
 fr = int(cap.get(cv2.CAP_PROP_FPS))
-plain_size = (256, 256)
+plain_size = (512, 512)
 plain_digit = np.zeros((*plain_size, 3), dtype=np.uint8)
 digit_size = (28, 28)
 digit_img = np.zeros(digit_size, dtype=np.uint8)
@@ -23,22 +24,26 @@ while True:
 		break
 	current_time += 1
 	frame = frame[:, 290:1370, :]
-	frame = cv2.rotate(frame, cv2.ROTATE_90_COUNTERCLOCKWISE)
+	#frame = cv2.rotate(frame)
 	frame = cv2.flip(frame, 1)
-	frame = cv2.resize(frame, plain_size, interpolation=cv2.INTER_AREA)
-	frame = cv2.blur(frame, (3, 3))
+	frame = cv2.resize(frame, plain_size)#, interpolation=cv2.INTER_AREA)
+	frame = cv2.blur(frame, (13, 13))
 
 	# Split RGB channels
 	b, g, r = cv2.split(frame)
 
 	# Perform thresholding to each channel
-	_, thresh_b = cv2.threshold(b, 120, 255, cv2.THRESH_BINARY_INV)
-	_, thresh_g = cv2.threshold(g, 120, 255, cv2.THRESH_BINARY_INV)
-	_, thresh_r = cv2.threshold(r, 120, 255, cv2.THRESH_BINARY)
+	_, thresh_b = cv2.threshold(b, 50, 255, cv2.THRESH_BINARY_INV)
+	#_, thresh_g = cv2.threshold(g, 40, 255, cv2.THRESH_BINARY_INV)
+	_, thresh_r = cv2.threshold(r, 70, 255, cv2.THRESH_BINARY)
+
+	cv2.imshow('b', thresh_b)
+	#cv2.imshow('g', thresh_g)
+	cv2.imshow('r', thresh_r) 
 
 	# Get the final result using bitwise operation
-	final_thresh = cv2.bitwise_or(thresh_b, thresh_g)
-	final_thresh = cv2.bitwise_and(final_thresh, thresh_r)
+	#final_thresh = cv2.bitwise_or(thresh_b, thresh_g)
+	final_thresh = cv2.bitwise_and(thresh_b, thresh_r)
 
 	# Find and draw contours
 	
@@ -73,7 +78,7 @@ while True:
 		last_time = current_time
 	else:
 		interval = current_time - last_time
-		if interval >= 10 and np.any(plain_digit):
+		if interval >= 30 and np.any(plain_digit):
 			x = digit_img.astype(np.float32) / 255. 
 			x = np.expand_dims(x, (0, -1))
 			predicted = np.argmax(model(x)[0])
